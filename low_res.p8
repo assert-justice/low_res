@@ -2,6 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
 plr1 = nil
+dbg={}
 function _init()
 	poke(0x5f2c,3)
 	inp={}
@@ -10,7 +11,9 @@ function _init()
 end
 
 function _draw()
-	cls()
+	cls(1)
+	for i,t in pairs(dbg) do print(t,0,i*8) end
+	dbg={}
 	plrdraw(plr1)
 end
 
@@ -20,10 +23,14 @@ function _update60()
 end
 
 function plrmove(plr)
-	if plr1.inp[0]>0 then plr1.x-=plr1.spd end
-	if plr1.inp[1]>0 then plr1.x+=plr1.spd end
-	if plr1.inp[2]>0 then plr1.y-=plr1.spd end
-	if plr1.inp[3]>0 then plr1.y+=plr1.spd end
+	dir=-1
+	spd = plr.spd
+	if plr.inp[5]>0 then spd *= 0.6 end
+	if plr.inp[0]>0 then plr.x-=spd dir=2 end
+	if plr.inp[1]>0 then plr.x+=spd dir=0 end
+	if plr.inp[2]>0 then plr.y-=spd dir=1 end
+	if plr.inp[3]>0 then plr.y+=spd dir=3 end
+	if plr.inp[4]==0 and dir!=-1 then plr.dir = dir end
 end
 
 function input(plr)
@@ -37,7 +44,8 @@ function input(plr)
 end
 
 function plrdraw(plr)
-	spr(7,plr.x,plr.y,1,1,1,false,false)
+	sp=7+2*plr.num+1-plr.dir%2
+	spr(sp,plr.x,plr.y,1,1,plr.dir==2,plr.dir==3)
 end
 
 __gfx__
